@@ -1,10 +1,10 @@
-// MenuCard.js
-
 import React from "react";
+import { connect } from "react-redux";
+import { addToCart } from "./redux/actions/cartActions";
 
-const MenuCard = ({ name, price, onAddToCart }) => {
+const MenuCard = ({ name, price, addToCart }) => {
   const handleAddToCart = () => {
-    onAddToCart({ name, price });
+    addToCart({ name, price });
   };
 
   return (
@@ -16,4 +16,8 @@ const MenuCard = ({ name, price, onAddToCart }) => {
   );
 };
 
-export default MenuCard;
+const mapDispatchToProps = {
+  addToCart,
+};
+
+export default connect(null, mapDispatchToProps)(MenuCard);

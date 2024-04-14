@@ -1,20 +1,25 @@
 import React from "react";
+import { connect } from "react-redux";
+import {
+  clearCart,
+  removeFromCart,
+  addToCart as addToCartAction,
+} from "./redux/actions/cartActions";
 
 const CartModal = ({
   cartItems,
   totalItems,
   totalPrice,
-  onRemove,
-  onAddToCart,
+  removeFromCart,
+  clearCart,
+  addToCart,
 }) => {
-  // 결제 처리 함수
   const handlePayment = () => {
     // 새 창 열기
     const receiptWindow = window.open("", "_blank");
 
-    // 새 창이 정상적으로 열렸는지 확인
+    // 새 창에 영수증 내용 작성
     if (receiptWindow) {
-      // 영수증 내용 작성
       const receiptContent = `
         <h2>주문 영수증</h2>
         <ul>
@@ -31,18 +36,11 @@ const CartModal = ({
         <button onclick="window.opener.location.reload(); window.close();">닫기</button>
       `;
 
-      // 새 창에 영수증 내용 쓰기
       receiptWindow.document.write(receiptContent);
     }
 
-    // 결제 후 장바구니 초기화
-    onClearCart();
-  };
-
-  // 장바구니 초기화 함수
-  const onClearCart = () => {
-    // onRemove 함수를 이용하여 모든 항목을 제거
-    cartItems.forEach((item) => onRemove(item.name));
+    // 결제 후 장바구니 비우기
+    clearCart();
   };
 
   return (
@@ -51,9 +49,9 @@ const CartModal = ({
       {cartItems.map((item) => (
         <div key={item.name} className="cart-item">
           <span>{item.name}</span>
-          <button onClick={() => onRemove(item.name)}>-</button>
+          <button onClick={() => removeFromCart(item.name)}>-</button>
           <span>{item.quantity}</span>
-          <button onClick={() => onAddToCart(item)}>+</button>
+          <button onClick={() => addToCart(item)}>+</button>
         </div>
       ))}
       <div className="cart-summary">
@@ -66,4 +64,22 @@ const CartModal = ({
   );
 };
 
-export default CartModal;
+const mapStateToProps = (state) => ({
+  cartItems: state.cart.cartItems,
+  totalItems: state.cart.cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  ),
+  totalPrice: state.cart.cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  ),
+});
+
+const mapDispatchToProps = {
+  removeFromCart,
+  clearCart,
+  addToCart: addToCartAction, // Redux 액션으로 연결된 addToCart 사용
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(CartModal);
